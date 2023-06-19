@@ -1,34 +1,78 @@
-const form = document.getElementById('locationForm');
-const locationInput = document.getElementById('locationInput');
-const weatherInfo = document.getElementById('weatherInfo');
-const locationElement = document.getElementById('location');
-const temperatureElement = document.getElementById('temperature');
-const humidityElement = document.getElementById('humidity');
-const windSpeedElement = document.getElementById('windSpeed');
+const inputTask = document.getElementById("input-task")
+const inputBtn = document.getElementById("input-btn")
+const tasks = document.getElementById('tasks')
 
-form.addEventListener('submit', function (e) {
-  e.preventDefault();
-  const location = locationInput.value;
-  getWeather(location);
-});
-
-async function getWeather(location) {
-  const apiKey = 'fd4aa4b2890e410f824173905230806'; 
-  const apiUrl = `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${location}`;
-
-  try {
-    const response = await fetch(apiUrl);
-    if (!response.ok) {
-      throw new Error('Weather data not available');
-    }
-    const data = await response.json();
-
-    locationElement.textContent = `Location: ${data.location.name}, ${data.location.country}`;
-    temperatureElement.textContent = `Temperature: ${data.current.temp_c}°C`;
-    humidityElement.textContent = `Humidity: ${data.current.humidity}%`;
-    windSpeedElement.textContent = `Wind Speed: ${data.current.wind_kph} km/h`;
-    weatherInfo.classList.remove('hidden');
-  } catch (error) {
-    alert('An error occurred. Please try again.');
-  }
+if (localStorage.getItem("tasksHTML")) {
+    tasks.innerHTML = localStorage.getItem("tasksHTML")
 }
+
+let tasksHTML = tasks.innerHTML
+let checkContent = document.querySelectorAll(".check-content")
+let taskBox = document.querySelectorAll('.task')
+
+const handelCross = () => {
+    taskBox = document.querySelectorAll('.task')
+    taskBox.forEach(element => {
+        const cross = element.querySelector('.cross')
+        cross.addEventListener("click", () => {
+            element.classList.add("none")
+            tasksHTML = tasks.innerHTML
+            localStorage.setItem("tasksHTML", tasksHTML)
+        })
+    })
+}
+
+
+const handelCheckbox = () => {
+    checkContent = document.querySelectorAll(".check-content")
+    checkContent.forEach(contentBox => {
+        const checkbox = contentBox.querySelector(".check")
+        const content = contentBox.querySelector(".content")
+        checkbox.addEventListener('click', () => {
+            if (checkbox.classList.contains("fa-square")) {
+                checkbox.classList.remove("fa-square")
+                checkbox.classList.add("fa-square-check")
+                content.classList.add("line-through")
+            } else if (checkbox.classList.contains("fa-square-check")) {
+                checkbox.classList.remove("fa-square-check")
+                checkbox.classList.add("fa-square")
+                content.classList.remove("line-through")
+            }
+            tasksHTML = tasks.innerHTML
+            localStorage.setItem("tasksHTML", tasksHTML)
+        })
+    })
+}
+
+const handelTask = () => {
+    const task = inputTask.value
+    if (task) {
+        tasks.innerHTML += `
+        <div class="task flex justify-space-between pd-medium">
+            <div class="check-content">
+                <i class="check fa-regular fa-square"></i>
+                <span class="content">${task}</span>
+            </div>
+            <i class="cross fa-solid fa-xmark"></i>
+        </div>
+    `
+        checkContent = document.querySelectorAll(".check-content")
+        inputTask.value = ""
+        handelCheckbox()
+        handelCross()
+        tasksHTML = tasks.innerHTML
+        localStorage.setItem("tasksHTML", tasksHTML)
+    }
+}
+
+inputBtn.addEventListener('click', () => {
+    handelTask()
+})
+inputTask.addEventListener('keypress', (event) => {
+    if (event.key === "Enter") {
+        handelTask()
+    }
+})
+
+handelCheckbox()
+handelCross()
